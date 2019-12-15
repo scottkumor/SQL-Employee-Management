@@ -24,7 +24,7 @@ connection.connect(function(err) {
 
 
 
-function ini() {
+function init() {
 
     console.log("-------------------------------------------");
     console.log("-----------------Welcome!------------------");
@@ -232,5 +232,36 @@ function queryInsRole() {
     })
 }
 
+function updateEmp() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "empID",
+            message: "Select Employee to edit by ID: ",
+        },
+        {
+            type: "input",
+            name: "newRoleID",
+            message: "Choose the ID of the  Employee's new Role (refer to roles table): ",
+        },
+    ]).then(answer => {
+        connection.query(
+            "UPDATE employees SET ? WHERE ?",
+            [
+                {
+                  role_id: answer.newRoleID
+                },
+                {
+                  id: answer.empID
+                }
+              ],
+              function(err, res) {
+                if(err) throw err;
+                console.log("updated")
+            })
+        })
+  }
 
+  //write functions that display better table data
+  //write joins to display data better
 
