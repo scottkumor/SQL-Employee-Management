@@ -1,8 +1,6 @@
-var mysql = require("mysql");
-var inquirer = require("inquirer");
-
-
-var connection = mysql.createConnection({
+const mysql = require("mysql");
+const inquirer = require("inquirer");
+const connection = mysql.createConnection({
     host: "localhost",
 
     // Your port; if not 3306
@@ -16,42 +14,39 @@ var connection = mysql.createConnection({
     database: "employee_tracker"
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
     if (err) throw err;
     //console.log("connected as id " + connection.threadId);
 });
 
-
-
-
 function init() {
 
-    console.log("-------------------------------------------");
-    console.log("-----------------Welcome!------------------");
-    console.log("-------------------------------------------");
+    console.log("---------------------------------------------");
+    console.log("----------------- Welcome! ------------------");
+    console.log("---------------------------------------------");
 
     inquirer.prompt({
-        name: "init",
-        type: 'list',
+        name: "initChoice",
+        type: "list",
         message: 'Choose a function',
         choices: [
             { value: 'View a Table' },
             { value: 'Insert Data into a Table' },
             { value: 'Update an Employee' },
-            { value: 'Exit Application' }
+            { value: 'Exit this Application' }
         ]
-    }).then(ans => {
-        if (ans === 'View a Table') {
+    }).then(({ initChoice }) => {
+        if (initChoice === "View a Table") {
             view();
         }
-        if (ans === 'Insert Data into a Table') {
+        if (initChoice === 'Insert Data into a Table') {
             insert();
         }
-        if (ans === 'Update an Employee') {
-            update();
+        if (initChoice === 'Update an Employee') {
+            updateEmp();
         }
-        if (ans === 'Exit Application') {
-            exit();
+        else {
+            console.log('exit with ctrl+C')
         }
 
     })
@@ -59,6 +54,11 @@ function init() {
 };
 
 function view() {
+
+    console.log("---------------------------------------------");
+    console.log("-------------- Choose a Table ---------------");
+    console.log("---------------------------------------------");
+
     inquirer.prompt({
         name: "view",
         type: "list",
@@ -66,9 +66,9 @@ function view() {
             { value: 'View Employees' },
             { value: 'View Departments' },
             { value: 'View Roles' },
-            { value: 'Return to Main Menu'},
+            { value: 'Return to Main Menu' },
         ],
-    }).then(function (view) {
+    }).then(({ view }) => {
         if (view === 'View Departments') {
             queryAllDepartments();
         }
@@ -84,43 +84,76 @@ function view() {
     })
 };
 
+function insert(){
+    console.log("---------------------------------------------");
+    console.log("-------------- Choose a Table ---------------");
+    console.log("---------------------------------------------");
+
+    inquirer.prompt({
+        name: "update",
+        type: "list",
+        choices: [
+            { value: 'Insert Data into Employees' },
+            { value: 'Insert Data into Departments' },
+            { value: 'Insert Data into Roles' },
+            { value: 'Return to Main Menu' },
+        ],
+    }).then(({ update }) => {
+        if (update === 'Insert Data into Departments') {
+            queryInsDept();
+        }
+        if (update === 'Insert Data into Roles') {
+            queryInsRole();
+        }
+        if (update === 'Insert Data into Employees') {
+            queryInsEmp();
+        }
+        if (update === 'Return to Main Menu') {
+            init();
+        }
+    })
+}
 function queryAllEmployees() {
     connection.query("SELECT * FROM employees", function (err, res) {
         if (err) throw err;
-        console.log("----------Employees----------")
+        console.log("-------------------- Employees -------------------------")
         for (var i = 0; i < res.length; i++) {
-            console.log("Employee Id#: " + res[i].id + " | " + "Name: " + res[i].first_name + " " + res[i].last_name + " | " + "Role ID#: " + res[i].role_id + " | " + "Department ID#: " + res[i].department_id);
+            console.log(`-----------------\n ${res[i].id} || ${res[i].first_name} ${res[i].last_name}`);
         }
-        console.log("-----------------------------");
+        console.log("--------------------------------------------------------");
     });
 };
 
 function queryAllDepartments() {
     connection.query("SELECT * FROM departments", function (err, res) {
         if (err) throw err;
-        console.log("----------Departments-------------");
+        console.log("-------------------- Departments -----------------------");
 
         for (var i = 0; i < res.length; i++) {
-            console.log("Department ID#: " + res[i].id + ": " + res[i].department_name);
+            console.log(`-----------------\n ${res[i].id} || ${res[i].department_name}`);
         }
-        console.log("----------------------------------");
+        console.log("--------------------------------------------------------");
     });
 };
 
 function queryAllRoles() {
     connection.query("SELECT * FROM roles", function (err, res) {
         if (err) throw err;
-        console.log("--------------Roles----------------");
+        console.log("------------------------Roles--------------------------");
 
         for (var i = 0; i < res.length; i++) {
-            console.log("Role ID#: " + res[i].id + ": " + res[i].title);
+            console.log(`----------------------------------\n ${res[i].id} || ${res[i].title} || $${res[i].salary}`);
         }
-        console.log("-----------------------------------");
+        console.log("-------------------------------------------------------");
     });
 };
 
 function queryInsEmp() {
-    // console.log('-------Please enter the new Employee\'s Information-----')
+    
+    console.log("-------------------------------------------------");
+    console.log("-------------- Add a New Employee ---------------");
+    console.log("-------------------------------------------------");    
+    
     inquirer.prompt([
         {
             type: "input",
@@ -148,25 +181,31 @@ function queryInsEmp() {
             message: "Enter Employee's Department ID: ",
         },
     ]).then(answer => {
+
         connection.query(
             "INSERT INTO employees SET ?",
-            { 
+            {
                 id: answer.id,
                 first_name: answer.first,
                 last_name: answer.last,
                 role_id: answer.role,
                 department_id: answer.department
-            
-            }, function(err, res) {
-                if(err) throw err;
-                console.log("inserted")
+
+            }, function (err, res) {
+                if (err) throw err;
                 queryAllEmployees();
+
+                console.log('done')
             })
     })
 }
 
 function queryInsDept() {
-    // console.log('-------Please enter the new Employee\'s Information-----')
+
+    console.log("-------------------------------------------------");
+    console.log("-------------- Add a New Department ---------------");
+    console.log("-------------------------------------------------");  
+    
     inquirer.prompt([
         {
             type: "input",
@@ -181,12 +220,12 @@ function queryInsDept() {
     ]).then(answer => {
         connection.query(
             "INSERT INTO departments SET ?",
-            { 
+            {
                 id: answer.id,
                 department_name: answer.deptName,
 
-            }, function(err, res) {
-                if(err) throw err;
+            }, function (err, res) {
+                if (err) throw err;
                 console.log("inserted")
                 queryAllDepartments();
             })
@@ -194,7 +233,11 @@ function queryInsDept() {
 }
 
 function queryInsRole() {
-    // console.log('-------Please enter the new Employee\'s Information-----')
+
+    console.log("---------------------------------------------");
+    console.log("-------------- Add a New  Role---------------");
+    console.log("---------------------------------------------");    
+
     inquirer.prompt([
         {
             type: "input",
@@ -219,14 +262,14 @@ function queryInsRole() {
     ]).then(answer => {
         connection.query(
             "INSERT INTO roles SET ?",
-            { 
+            {
                 id: answer.id,
                 department_id: answer.deptID,
                 title: answer.title,
                 salary: answer.salary
 
-            }, function(err, res) {
-                if(err) throw err;
+            }, function (err, res) {
+                if (err) throw err;
                 console.log("inserted")
             })
     })
@@ -242,26 +285,29 @@ function updateEmp() {
         {
             type: "input",
             name: "newRoleID",
-            message: "Choose the ID of the  Employee's new Role (refer to roles table): ",
+            message: "Choose the ID of the Employee's new Role (refer to roles table): ",
         },
     ]).then(answer => {
         connection.query(
             "UPDATE employees SET ? WHERE ?",
             [
                 {
-                  role_id: answer.newRoleID
+                    role_id: answer.newRoleID
                 },
                 {
-                  id: answer.empID
+                    id: answer.empID
                 }
-              ],
-              function(err, res) {
-                if(err) throw err;
+            ],
+            function (err, res) {
+                if (err) throw err;
+                queryAllEmployees();
+
                 console.log("updated")
             })
-        })
-  }
+    })
+}
 
-  //write functions that display better table data
-  //write joins to display data better
+//write functions that display better table data
+//write joins to display data better
 
+init();
