@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+
 const connection = mysql.createConnection({
     host: "localhost",
 
@@ -90,7 +91,7 @@ function insert(){
     console.log("---------------------------------------------");
 
     inquirer.prompt({
-        name: "update",
+        name: "insert",
         type: "list",
         choices: [
             { value: 'Insert Data into Employees' },
@@ -98,17 +99,17 @@ function insert(){
             { value: 'Insert Data into Roles' },
             { value: 'Return to Main Menu' },
         ],
-    }).then(({ update }) => {
-        if (update === 'Insert Data into Departments') {
+    }).then(({ insert }) => {
+        if (insert === 'Insert Data into Departments') {
             queryInsDept();
         }
-        if (update === 'Insert Data into Roles') {
+        if (insert === 'Insert Data into Roles') {
             queryInsRole();
         }
-        if (update === 'Insert Data into Employees') {
+        if (insert === 'Insert Data into Employees') {
             queryInsEmp();
         }
-        if (update === 'Return to Main Menu') {
+        if (insert === 'Return to Main Menu') {
             init();
         }
     })
@@ -120,8 +121,10 @@ function queryAllEmployees() {
         for (var i = 0; i < res.length; i++) {
             console.log(`-----------------\n ${res[i].id} || ${res[i].first_name} ${res[i].last_name}`);
         }
-        console.log("--------------------------------------------------------");
-    });
+    })
+    console.log("--------------------------------------------------------");
+
+    view();
 };
 
 function queryAllDepartments() {
@@ -132,8 +135,9 @@ function queryAllDepartments() {
         for (var i = 0; i < res.length; i++) {
             console.log(`-----------------\n ${res[i].id} || ${res[i].department_name}`);
         }
-        console.log("--------------------------------------------------------");
     });
+    console.log("--------------------------------------------------------");
+    view();
 };
 
 function queryAllRoles() {
@@ -144,8 +148,9 @@ function queryAllRoles() {
         for (var i = 0; i < res.length; i++) {
             console.log(`----------------------------------\n ${res[i].id} || ${res[i].title} || $${res[i].salary}`);
         }
-        console.log("-------------------------------------------------------");
     });
+    console.log("-------------------------------------------------------");
+    view();
 };
 
 function queryInsEmp() {
@@ -197,6 +202,7 @@ function queryInsEmp() {
 
                 console.log('done')
             })
+            insert();
     })
 }
 
@@ -229,6 +235,8 @@ function queryInsDept() {
                 console.log("inserted")
                 queryAllDepartments();
             })
+            insert();
+
     })
 }
 
@@ -272,6 +280,8 @@ function queryInsRole() {
                 if (err) throw err;
                 console.log("inserted")
             })
+            insert();
+
     })
 }
 
@@ -304,6 +314,7 @@ function updateEmp() {
 
                 console.log("updated")
             })
+            view();
     })
 }
 
